@@ -25,6 +25,7 @@ puntos_rugby *= 3
 ###### Devuelvo los datos #########
 print("tienes:", puntos_rugby, "puntos totales")
 ```
-Nota: Tener cuidado con el cierre de parentesis, se deben cerrar todos los que se abran para que todo funcione.
+**Nota:**
+- Tener cuidado con el cierre de parentesis, se deben cerrar todos los que se abran para que todo funcione.
 
 Trabajar con int nos permite convertir el valor introducido en un numero entero haciendo todo mas simplificado.
