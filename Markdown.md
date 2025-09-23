@@ -1,4 +1,4 @@
-##Aquí tienes los trucos de Markdown explicados de forma más simple y clara, en formato lista:##
+#Aquí tienes los trucos de Markdown explicados de forma más simple y clara, en formato lista:
 
 **Encabezados:** Usa uno o más # al inicio de la línea para hacer títulos.
 Ejemplo: # Título 1, ## Título 2, ### Título 3.
