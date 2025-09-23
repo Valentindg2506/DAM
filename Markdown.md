@@ -1,72 +1,55 @@
-Aquí tienes todos los trucos más comunes y útiles de Markdown para crear contenido claro, organizado y fácil de mantener:
+Aquí tienes los trucos de Markdown explicados de forma más simple y clara, en formato lista:
 
-- Encabezados:  
-  Usa # para título nivel 1, ## para subtítulo nivel 2, ### para sección nivel 3, etc.
+Encabezados: Usa uno o más # al inicio de la línea para hacer títulos.
+Ejemplo: # Título 1, ## Título 2, ### Título 3.
 
-- Negrita:  
-  **texto** para poner texto en negrita.
+Párrafos: Separa los párrafos dejando una línea en blanco entre ellos.
 
-- Cursiva:  
-  *texto* para texto en cursiva.
+Saltos de línea: Para cambiar de línea sin empezar párrafo, pon dos espacios al final y luego presiona Enter.
 
-- Negrita y cursiva combinadas:  
-  ***texto*** para combinar ambos estilos.
+Negrita: Pon dos asteriscos antes y después del texto para resaltarlo en negrita.
+Ejemplo: **texto**.
 
-- Tachado:  
-  ~~texto~~ para tachar texto.
+Cursiva: Pon un asterisco antes y después del texto para ponerlo en cursiva.
+Ejemplo: *texto*.
 
-- Listas sin orden:  
-  - item  
-  Usa guion (-) o asterisco (*) seguido de un espacio para crear listas sin orden.
+Negrita + Cursiva: Usa tres asteriscos antes y después para combinar ambos.
+Ejemplo: ***texto***.
 
-- Listas numeradas:  
-  1. item  
-  Usa números seguidos de punto y espacio para listas ordenadas.
+Tachado: Usa dos virgulillas ~~ al inicio y al final para tachar texto.
+Ejemplo: ~~texto~~.
 
-- Citas en bloque:  
-  > tu cita aquí  
-  Para mostrar citas o bloques resaltados.
+Listas sin orden: Usa -, + o * al inicio para crear listas.
+Ejemplo: - Item.
 
-- Enlaces:  
-  [texto](https://sitio.com)  
-  Para agregar enlaces.
+Listas ordenadas: Usa números seguidos de punto para listas numeradas.
+Ejemplo: 1. Item.
 
-- Imágenes:  
-  ![alt](  
-    
-  Para insertar imágenes con texto alternativo.
+Listas de tareas: Para pendientes usa - [ ], para completadas - [x].
+Ejemplo: - [ ] tarea, - [x] tarea hecha.
 
-- Código en línea:  
-  `fragmento`  
-  Para resaltar código o comandos cortos en línea.
+Citas: Usa > al inicio para citar texto.
+Ejemplo: > Esto es una cita.
 
-- Bloques de código:  
-  ```lenguaje  
-  tu código  
-  ```
-  Para bloques de código con resaltado, opcionalmente especificando el lenguaje.
+Código en línea: Usa comillas invertidas para resaltar código corto. Ejemplo: ``código` ``.
 
-- Tablas:  
-  encabezado1 | encabezado2  
-  --- | ---  
-  fila1col1 | fila1col2  
-  fila2col1 | fila2col2  
-  Para construir tablas con separadores de columnas.
+Bloques de código: Usa tres comillas invertidas ``` antes y después para código en bloque.
 
-- Tareas o listas de comprobación:  
-  - [ ] pendiente  
-  - [x] hecho  
-  Para listas con casillas de verificación.
+Enlaces: Pon el texto entre [] y la URL entre ().
+Ejemplo: [texto](https://ejemplo.com).
 
-- Separadores horizontales:  
-  ---  
-  ***  
-  Para crear líneas horizontales como separadores.
+Imágenes: Igual que enlaces pero con ! al inicio.
+Ejemplo: ![alt](imagen.jpg).
 
-- Párrafos y saltos de línea:  
-  Línea en blanco para nuevo párrafo.  
-  Dos espacios al final de una línea para salto de línea forzado.
+Línea horizontal: Escribe tres o más guiones --- o asteriscos *** en línea sola.
 
-Estos trucos cubren la mayoría de las necesidades para crear documentación técnica, blogs, notas y más con Markdown de forma clara y eficaz.[1]
+Tablas: Usa | para columnas y - para separar filas.
+Ejemplo:
 
-[1](https://www.q2bstudio.com/nuestro-blog/17549/trucos-de-markdown)
+text
+| Col1 | Col2 |
+|------|------|
+| Dato | Dato |
+Notas al pie: Usa [^1] en texto y define [1]: explicación abajo.
+
+Escapar caracteres: Pon \ antes de símbolos si quieres mostrarlos sin formato.
