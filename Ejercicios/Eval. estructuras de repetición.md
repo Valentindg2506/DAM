@@ -1,5 +1,5 @@
 En el ejercicio a continuación vamos a utilizar la estructura de control `for` para indicar los patitos que se producen en un año.
-Para realizar este ejercicio primero hay que definir el rango de años,definiendo un bucle ´for´ para recorrer los años desde 2018 hasta 2023, como se puede ver a continuación:
+Para realizar este ejercicio primero hay que definir el rango de años,definiendo un bucle `for` para recorrer los años desde 2018 hasta 2023, como se puede ver a continuación:
 ```
 for año in range (2018, 2024):
 ```
