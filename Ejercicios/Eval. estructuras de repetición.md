@@ -1,4 +1,4 @@
-En el ejercicio a continuación vamos a utilizar la estructura de control ´for´ para indicar los patitos que se producen en un año.
+En el ejercicio a continuación vamos a utilizar la estructura de control `for` para indicar los patitos que se producen en un año.
 Para realizar este ejercicio primero hay que definir el rango de años,definiendo un bucle ´for´ para recorrer los años desde 2018 hasta 2023, como se puede ver a continuación:
 ```
 for año in range (2018, 2024):
@@ -26,6 +26,6 @@ for año in range (2018, 2024):
 ```
 
 **NOTAS:**
-- A la hora de utilizar el bucle ´for´ dentro del paréntesis el segundo valor tiene que ser un numero mas del que quieres indicar.
+- A la hora de utilizar el bucle `for` dentro del paréntesis el segundo valor tiene que ser un numero mas del que quieres indicar.
 
 En rugby este código puede utilizarse para contar la cantidad de partidos que se juegan por año.
