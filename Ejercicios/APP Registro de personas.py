@@ -16,23 +16,30 @@ class Persona():
 ## DEFINO SETTERS Y GETTERS ##
 	def setNombre(self, nuevonombre):
 		self.nombre = nuevonombre
+		
 	def setApellido(self, nuevoapellido):
 		self.apellido = nuevoapellido
+		
 	def setEdad(self, nuevaedad):
 		self.edad = nuevaedad
+		
 	def setOcupacion(self, nuevaocupacion):
 		self.ocupacion = nuevaocupacion
+		
 	def getNombre(self):
 		return self.nombre
+		
 	def getApellido(self):
 		return self.apellido
+		
 	def getEdad(self):
 		return self.edad
+		
 	def getOcupacion(self):
 		return self.ocupacion
 		
 	
-personas = [] # CREO UNA LISTA VACIA #
+listapersonas = [] # CREO UNA LISTA VACIA #
 
 print("Programa de registro de personas v0.1 Valentín Antonio De Gennaro")
 
@@ -50,29 +57,29 @@ while True:
 	if opcion == 1:
 		print("Vamos a insertar una persona")
 ## INGRESO DE INFORMACION ##
-		nuevapersona = Persona()
+		nuevo = Persona()
 		
 		nombrepersona = input("Introduce el nombre de la persona: ")
-		nuevapersona.setNombre(nombrepersona)
+		nuevo.setNombre(nombrepersona)
 		
 		apellidopersona = input("Introduce el apellido de la persona: ")
-		nuevapersona.setApellido(apellidopersona)
+		nuevo.setApellido(apellidopersona)
 		
 		edadpersona = int(input("Introduce la edad de la persona: "))
-		nuevapersona.setEdad(edadpersona)
+		nuevo.setEdad(edadpersona)
 		
 		ocupacion = input("Introduce la ocupación de la persona: ")
-		nuevapersona.setOcupacion(ocupacion)
+		nuevo.setOcupacion(ocupacion)
 		
 ## AÑADIMOS EL CLIENTE A LA LISTA ##
-		personas.append(nuevapersona)
-
+		listapersonas.append(nuevo)
+		print("Cliente insertado correctamente.")
 	elif opcion == 2:
 		print("Vamos a ver la lista de personas")
-		for Persona in personas:
+		for persona in listapersonas:
 			print("-------------------------------------------------")
-			print("Nombre: ", Persona.getNombre())
-			print("Apellido: ", Persona.getApellido())
-			print("Edad: ", Persona.getEdad())
-			print("Ocupación: ", Persona.getOcupacion())
+			print("Nombre:", persona.getNombre())
+			print("Apellido:", persona.getApellido())
+			print("Edad:", persona.getEdad())
+			print("Ocupación:", persona.getOcupacion())
 			print("-------------------------------------------------")
