@@ -1,0 +1,23 @@
+class Cliente():
+	def __init__(self,nombre,apellidos,email,direccion):
+		self.nombre = nombre
+		self.apellido = apellidos
+		self.email = email
+		self.direccion = direccion
+
+clientes = []
+while True:
+
+	nombre = input("Introduce el nombre del cliente: ")
+	apellidos = input("Introduce los apellidos del cliente: ")
+	email = input("Introduce el email del cliente: ")
+	direccion = input("Introduce la direccion del cliente: ")
+
+	clientes.append(Cliente(nombre,apellidos,email,direccion))
+	
+	for cliente in clientes:
+		print("-----------------------")
+		print(cliente(nombre))
+		print(cliente(apellido))
+		print(cliente(email))
+		print(cliente(direccion))
