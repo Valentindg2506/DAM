@@ -14,10 +14,3 @@ while True:
 	direccion = input("Introduce la direccion del cliente: ")
 
 	clientes.append(Cliente(nombre,apellidos,email,direccion))
-	
-	for cliente in clientes:
-		print("-----------------------")
-		print(cliente(nombre))
-		print(cliente(apellido))
-		print(cliente(email))
-		print(cliente(direccion))
