@@ -1,4 +1,4 @@
-################### En este bloque tomo los datos del usuario #######################
+#En este bloque tomo los datos del usuario #######################
 
 
 '''
@@ -22,7 +22,7 @@ resistencia_dragon_b = 0
 print("El nombre del dragon B es:", nombre_dragon_b)
 print("La edad del dragon B es:", edad_dragon_b)
 
-################ En este bloque me aseguro de que son enteros ##################
+#En este bloque me aseguro de que son enteros ##################
 
 try:
     edad_dragon_a = int(edad_dragon_a)
@@ -38,7 +38,7 @@ except:
     edad_dragon_b = 100
     print("No he convertido la edad B correctamente")
     
-################### En este bloque clasifico los dragones ########################## 
+#En este bloque clasifico los dragones ########################## 
     
 if edad_dragon_a < 50:
     clasificacion_dragon_a = "Joven"
@@ -56,11 +56,11 @@ elif edad_dragon_b >= 100:
     clasificacion_dragon_b = "Anciano"
 print("El dragon B es:", clasificacion_dragon_b)
 
-############# Ahora los vamos a entrenar ###################################
+#Ahora los vamos a entrenar ###################################
 
 for dia in range (1,4):
 
-#################como entrenar a tu dragon A ##############################
+#como entrenar a tu dragon A##############################
     
     if clasificacion_dragon_a == "Joven":
         fuerza_dragon_a += 2
@@ -74,7 +74,7 @@ for dia in range (1,4):
     print("Final del dia" , dia)
     print("El dragon A ahora tiene ", fuerza_dragon_a,"de fuerza y ", resistencia_dragon_a, " de resistencia")
     
-#################como entrenar a tu dragon B ###############################
+    #como entrenar a tu dragon B###############################
     
     if clasificacion_dragon_b == "Joven":
         fuerza_dragon_b += 2
@@ -86,4 +86,5 @@ for dia in range (1,4):
         fuerza_dragon_b += 1
         resistencia_dragon_b += 1
     print("Final del dia" , dia)
-    print("El dragon B ahora tiene ", fuerza_dragon_b,"de fuerza y ", resistencia_dragon_b, " de resistencia") 
+    print("El dragon B ahora tiene ", fuerza_dragon_b,"de fuerza y ", resistencia_dragon_b, " de resistencia")    
+
