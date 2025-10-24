@@ -10,8 +10,8 @@ CORS(app)
 
 DB_CONFIG = {
     "host": "localhost",
-    "user": "empresadam",
-    "password": "Empresadam123$",
+    "user": "valentin",
+    "password": "Empresadam2526@",
     "database": "crm_inmobiliario",
 }
 
