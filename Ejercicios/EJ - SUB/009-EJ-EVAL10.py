@@ -18,4 +18,3 @@ juegos_movil.append(juego1)
 juegos_movil.append(juego2)
 juegos_movil.append(juego3)
 
-for
