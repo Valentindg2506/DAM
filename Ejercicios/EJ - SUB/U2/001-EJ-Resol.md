@@ -1,41 +1,51 @@
-En el ejercicio a continuación se visualiza un código que clasifica a un jugador dependiendo de su edad.
-Para realizar este ejercicio primero hay que definir la variable, como se puede ver a continuación:
+En este ejercicio vamos a calcular la raiz de un numero, y luego lo vamos a redondear. En el rugby se puede usar para calcular los puntos totales de un torneo
+En este ejercicio vamos a utilizar la funciòn `sqrt` de la libreria `math`, se importa de la siguiente manera:
 ```
-edad_jugador = 21
+from math import sqrt
 ```
-Luego mediante las estructuras de control `if`, `elif` y `else` se van a clasificar a los jugadores y mediante la función `print` para mostrar la clasificación como se puede ver a continuación:
+luego de eso tenemos que definir la varaible y asiganrle un literal, que va a ser el nùmero que usaremos para calcular la raiz.
 ```
-if edad_jugador < 10:
-    print("Eres un niño")
-elif edad_jugador > 10 and edad_jugador <= 19:
-    print("Eres un adolescente")
-elif edad_jugador > 20 and edad_jugador <= 30:
-    print("Eres un joven")
-else:
-    print("Ya no eres un joven")
+puntuacion_total = 1569
 ```
-Y a continuación se puede visualizar el código completo:
+ahora empieza la parte de calcular, empezamos por la raiz
 ```
-'''
-    Clasificador de edades
-    v0.1 Valentin Antonio De Gennaro
-    Clasifica a un jugador segun se edad
-'''
+resultado = sqrt(puntuacion_total)
+```
+luego tenemos que redondear ese resultado
+```
+redondeo = round(resultado)
+```
+y como parte final hay que mostrarle al usuario el resultado final
+```
+print("El resultado final es:",redondeo)
+```
+A continuación el codigo completo:
+```
+	'''
+		Calculos matematicos
+		v0.1 Valentin Antonio De Gennaro
+	'''
 
-############### DECLARAMOS LA VARIABLE Y LE ASIGNAMOS UN VALOR #############
-edad_jugador = 21
+	## Importamos la funcion sqrt (raiz) de la libreria math ##
 
-############### CLASIFICAMOS POR EDADES ##############################
-if edad_jugador < 10:
-    print("Eres un niño")
-elif edad_jugador > 10 and edad_jugador <= 19:
-    print("Eres un adolescente")
-elif edad_jugador > 20 and edad_jugador <= 30:
-    print("Eres un joven")
-else:
-    print("Ya no eres un joven")
+	from math import sqrt
+
+	## Defino la variable
+
+	puntuacion_total = input("Introduce la puntuación total: ")
+
+	## Calculo la raiz ##
+
+	resultado = sqrt(puntuacion_total)
+
+	## Redondeo el resultado ##
+
+	redondeo = round(resultado)
+
+	## Muestro el resultado ##
+
+	print("El resultado redondeado es:",redondeo)
 ```
-
 **NOTAS:**
-- Las estructuras de control `if`, `elif` y `else` son muy útiles a la hora de decirle al programa que si se cumple lo que le dijiste haga una cosa y si no lo cumple haga otra.
-- En un pueblo pequeño con un club de futbol puede ser útil a la hora de definir lo equipos por edades este programa te va a facilitar la clasificación.
+- El uso de la libreria `math` es necesario para poder realizar calculo de raiz cuadrada, que en este caso se hace haciendo uso de la función `sqrt`
+
