@@ -4,19 +4,20 @@
    programa que calcula numero de cuadras a partir de los caballos
 '''
 
-from math import ceil
+import math as matematicas
 
 #datos de inicio
 caballos = 0
 cuadras = 0
-caballos_por_cuadra = 0
+caballos_por_cuadra = 3
+juegos_movil = 0
 
 #entrada de la información
 caballos_por_cuadra =int(input("introduce el numero de caballos por cuadra: "))
 caballos = int(input("introduce el numero de caballos: "))
 
 #realización de cálculos
-cuadras = caballos / 3
+cuadras = caballos / caballos_por_cuadra
 redondeoalza = matematicas.ceil(cuadras)
 
 #salida de resultados
