@@ -3,9 +3,9 @@ from tkinter import ttk
 import mysql.connector
 conexion = mysql.connector.connect(
     host="localhost",
-    user="empresadam",
-    password="Empresadam123$",
-    database="empresadam"
+    user="Valentin",
+    password="Valendg_25",
+    database="CRM"
 )
 cursor = conexion.cursor()
 ventana = tk.Tk()
