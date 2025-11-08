@@ -3,24 +3,19 @@
    v0.1 (c) valentin
    programa que calcula numero de cuadras a partir de los caballos
 '''
+from math import ceil
 
-import math as matematicas
+## DEFINIMOS LAS VARIABLES Y LE PEDIMOS AL USUARIO QUE LE ASIGNE LOS VALORES ##
+numero_caballos = int(input("Introduce el número de caballos que tiene Carlos: "))
+jugos_movil = int(input("Introduce el número de juegos de móvil que jugó Carlos: "))
 
-#datos de inicio
-caballos = 0
-cuadras = 0
-caballos_por_cuadra = 3
-juegos_movil = 0
+## CÁLCULAMOS ##
+cuadras = numero_caballos / 3
+redondeoalza = ceil(cuadras)
 
-#entrada de la información
-caballos_por_cuadra =int(input("introduce el numero de caballos por cuadra: "))
-caballos = int(input("introduce el numero de caballos: "))
-
-#realización de cálculos
-cuadras = caballos / caballos_por_cuadra
-redondeoalza = matematicas.ceil(cuadras)
-
-#salida de resultados
-print("si tienes",caballos,"caballos")
-print("y te caben",caballos_por_cuadra,"caballos por cuadra")
-print("en ese caso necesitas",redondeoalza,"cuadras")
+## MOSTRAMOS LA INFORMACIÓN ##
+print("-------------------------------------------")
+print("Carlos tiene", numero_caballos, "caballos.")
+print("Jugó", jugos_movil, "juegos de móvil.")
+print("Necesita", redondeoalza, "cuadras.")
+print("-------------------------------------------")
