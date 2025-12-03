@@ -1,3 +1,7 @@
+'''
+	Duelo de magos
+	v0.1 Valentín Antonio de Gennaro
+'''
 ################### Pedir edad #####################
 
 edad_mago = input("Introduce la edad del mago: ")
@@ -13,7 +17,7 @@ try:
     
 except:
     edad_mago = 100
-    print("No he convertido la edad correctamente")
+    print("No he convertido la edad correctamente, uso 100 años por defecto")
     
 ################### Clasificacion por edad ############
 
@@ -32,9 +36,11 @@ print("El mago es: ", clasificacion_mago)
 def poderBase(clasificacion_mago):
     '''
         poderBase
-        entradas: edad_mago
+        entradas: clasificacion_mago
         salidas: poder_base
     '''
+    poder_base = 0
+
     if clasificacion_mago == "Aprendiz":
         poder_base = 5
         
@@ -43,29 +49,62 @@ def poderBase(clasificacion_mago):
         
     elif clasificacion_mago == "Archimago":
         poder_base = 10
-    print("El poder base de tu: ", clasificacion_mago, "es: ", poder_base)
 
-print(poderBase(clasificacion_mago))
+    print("El poder base de tu", clasificacion_mago, "es:", poder_base)
+    return poder_base
 
-# empezamos bucle
+# Llamo a la función y guardo el resultado en la variable poder_base
+poder_base = poderBase(clasificacion_mago)
+
+################### Duelo con el escudo ###################
 
 # escudo empieza con 15pts
+energia_escudo = 15
+print("La energía inicial del escudo es:", energia_escudo)
 
 # recorre dos turnos con for
+for turno in range(1, 3):
+    print("\n---------- Turno", turno, "----------")
 
-# turno 1 fuego daño = poderbase // 2
+    # turno 1 fuego daño = poderbase // 2
+    if turno == 1:
+        print("El mago lanza un hechizo de FUEGO")
+        daño = poder_base // 2
+    
+    # turno 2 hechizo rayo = daño = poderbase // 3
+    else:
+        print("El mago lanza un hechizo de RAYO")
+        daño = poder_base // 3
 
-# turno 2 hechizo rayo = daño = poderbase // 3
+    # nos aseguramos de que el daño nunca sea negativo
+    if daño < 0:
+        daño = 0
 
-# resta el daño al escudo
+    # tras cada daño, print de daño y mayor que cero
+    print("El daño provocado al escudo es:", daño)
 
+    # resta el daño al escudo
+    energia_escudo = energia_escudo - daño
 
-#tras cada daño, print de daño y mayor que cero
+    # tras ajuste de energia, energia no puede ser menor que cero
+    if energia_escudo < 0:
+        energia_escudo = 0
 
-#tras ajuste de energia, print y energia es mayor que cero
+    print("La energía del escudo tras el ataque es:", energia_escudo)
 
-# salida : edad, rango, poderbase, energia del escudo
+################### Salida final ###################
+
+print("\n=========== RESUMEN DEL DUELO ===========")
+print("Edad del mago:", edad_mago)
+print("Rango del mago:", clasificacion_mago)
+print("Poder base del mago:", poder_base)
+print("Energía final del escudo:", energia_escudo)
 
 # energia es 0
+if energia_escudo == 0:
+    print("El escudo ha sido destruido. El duelo ha roto la defensa mágica.")
 
 # energia es mayor que 0, escudo resiste duelo
+else:
+    print("El escudo resiste el duelo. La barrera mágica sigue en pie.")
+
