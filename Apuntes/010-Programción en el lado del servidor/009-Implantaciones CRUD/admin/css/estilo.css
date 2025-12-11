@@ -16,6 +16,22 @@ main{
 	flex:4;
 	background:white;
 }
+#nuevo{
+	position:absolute;
+	bottom:20px;
+	right:20px;
+	background:orangered;
+	color:white;
+	width:30px;
+	height:30px;
+	border-radius:40px;
+	text-align:center;
+	font-size:30px;
+	line-height:30px;
+	text-decoration:none;
+	font-weight:bold;
+}
+
 /* ESTILOS DEL MENU /////////////  */
 nav{
 	display:flex;
@@ -29,6 +45,7 @@ nav button{
 	color:black;
 	padding:10px;
 }
+
 /* ESTILOS DE LA TABLA /////////////  */
 main{
 	padding:20px;
@@ -66,4 +83,18 @@ table tr:nth-child(even){
 table{
 	border-radius: 8px;
 	overflow: hidden;
+}
+
+
+/* ESTILOS DE LA TABLA /////////////  */
+form{
+	display:flex;
+	width:100%;
+	flex-direction:column;
+	gap:20px;
+}
+.controlformulario{
+	display:flex;
+	width:100%;
+	flex-direction:column;
 }
