@@ -84,9 +84,18 @@ table{
 	border-radius: 8px;
 	overflow: hidden;
 }
+.eliminar,.editar{
+	width:20px;
+	height:20px;
+	border-radius:30px;
+	line-height:20px;
+	text-decoration:none;
+	display:block;
+	text-align:center;
+}
 
 
-/* ESTILOS DE LA TABLA /////////////  */
+/* ESTILOS DEL FORMULARIO /////////////  */
 form{
 	display:flex;
 	width:100%;
