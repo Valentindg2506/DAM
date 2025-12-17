@@ -4,12 +4,12 @@ import mysql.connector                             # Importamos MySQL
 import time                                       # Para dormir
 from urllib.parse import urljoin, urlparse
 
-URLS = ["https://espn.com"]
+URLS = ["https://elpais.com"]
 
 DB_HOST = "localhost"
-DB_USER = "Satori"
+DB_USER = "satori"
 DB_PASSWORD = "Satori123$"
-DB_NAME = "Satori"
+DB_NAME = "satori"
 
 VISITADAS = set()   # Para evitar bucles infinitos
 
@@ -53,7 +53,7 @@ def busca(URLS):
 
         VISITADAS.add(URL)
 
-        time.sleep(5)
+        time.sleep(1)
 
         try:
             print("Procesando:", URL)
@@ -115,5 +115,3 @@ def busca(URLS):
 
 
 busca(URLS)
-
-
