@@ -26,3 +26,20 @@
 		}
 	?>
 </table>
+<!-- Me voy a la operacion insertar y me llevo la tabla actual -->
+<a href="?operacion=insertar&tabla=<?= $_GET['tabla']?>" class="boton_insertar">+</a>
+<style>
+	.boton_insertar{
+		position:absolute;
+		bottom: 20px;
+		right: 20px;
+		background:orangered;
+		border-radius:30px;
+		width:35px;
+		height:35px;
+		color:white;
+		text-align:center;
+		line-height:35px;
+		text-decoration:none;
+	}
+</style>
