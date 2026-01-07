@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="717.3437320484832" height="370.4218965418197" viewBox="0 0 717.3437320484832 370.4218965418197">
+
+  <defs>
+    <style>
+      text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 12px; fill: #111827; }
+      .shape-rect { fill: #ffffff; stroke: #9ca3af; stroke-width: 1; }
+      .shape-entity { fill: #ffffff; stroke: #111827; stroke-width: 2; }
+      .shape-circle { fill: #ffffff; stroke: #9ca3af; stroke-width: 1; }
+      .shape-pill { fill: #ffffff; stroke: #9ca3af; stroke-width: 1; }
+      .shape-db { fill: #ffffff; stroke: #9ca3af; stroke-width: 1; }
+      .conn { stroke: #111827; stroke-width: 2; fill: none; }
+    </style>
+    <marker id="arrow-end" markerWidth="10" markerHeight="7" refX="10" refY="3.5"
+            orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#111827"/>
+    </marker>
+    <marker id="arrow-start" markerWidth="10" markerHeight="7" refX="0" refY="3.5"
+            orient="auto" markerUnits="strokeWidth">
+      <polygon points="10 0, 0 3.5, 10 7" fill="#111827"/>
+    </marker>
+  </defs>
+        
+<rect class="shape-rect" x="41.37499640969668" y="58.01562140969668" width="119.99999999999996" height="39.999999999999986" rx="4" ry="4" />
+<text x="101.37499640969665" y="82.01562140969668" text-anchor="middle">login</text>
+<text x="52.515617819393384" y="54.921864229090076">Panel admin</text>
+<rect class="shape-rect" x="200.26562859030327" y="61.42186781939337" width="119.99999999999996" height="39.999999999999986" rx="4" ry="4" />
+<text x="260.26562859030327" y="85.42186781939336" text-anchor="middle">procesalogin</text>
+<rect class="shape-rect" x="366.70311422909" y="60.71874281939337" width="119.99996409696686" height="39.999999999999986" rx="4" ry="4" />
+<text x="426.7030962775734" y="84.71874281939336" text-anchor="middle">escritorio (tabla)</text>
+<rect class="shape-rect" x="546.7030783260568" y="62.15624640969668" width="130.64065372242644" height="39.999999999999986" rx="4" ry="4" />
+<text x="612.02340518727" y="86.15624640969668" text-anchor="middle">insertar (opcional)</text>
+<text x="380.26562859030315" y="54">Read - Delete</text>
+<text x="569.5312320484832" y="54.703125">Insert - Update</text>
+<text x="52.359367819393384" y="177.95313936121318">Frontal de la app</text>
+<rect class="shape-rect" x="40" y="181.59375359030327" width="119.99998204848342" height="39.99998204848344" rx="4" ry="4" />
+<text x="99.99999102424171" y="205.593744614545" text-anchor="middle">Front page</text>
+<rect class="shape-rect" x="201.75000359030327" y="181.57813577090988" width="119.99999999999996" height="40.00001795151653" rx="4" ry="4" />
+<text x="261.75000359030327" y="205.57814474666816" text-anchor="middle">Catalogo</text>
+<rect class="shape-rect" x="368.82814295151644" y="181.59375359030327" width="119.99996409696686" height="39.99998204848344" rx="4" ry="4" />
+<text x="428.8281249999999" y="205.593744614545" text-anchor="middle">Producto</text>
+<rect class="shape-rect" x="526.4843570484834" y="181.60938936121318" width="119.99999999999996" height="39.999999999999986" rx="4" ry="4" />
+<text x="586.4843570484834" y="205.60938936121318" text-anchor="middle">Pedido</text>
+<rect class="shape-rect" x="294.70313577090985" y="290.4218965418197" width="119.99999999999996" height="39.999999999999986" rx="4" ry="4" />
+<text x="354.70313577090985" y="314.4218965418197" text-anchor="middle">Confirmación</text>
+<path class="conn" d="M 161.37499640969668 79.30188216514193 L 200.2656285903032 80.13560706394811" marker-end="url(#arrow-end)" />
+<path class="conn" d="M 320.2656285903032 81.16839424408478 L 366.70311422909 80.97221631886471" marker-end="url(#arrow-end)" />
+<path class="conn" d="M 486.70307832605675 81.18415424742449 L 546.7030783260568 81.64956581470298" marker-start="url(#arrow-start)" marker-end="url(#arrow-end)" />
+<path class="conn" d="M 159.9999820484834 201.5879579569878 L 201.7500035903032 201.58393140509096" marker-end="url(#arrow-end)" />
+<path class="conn" d="M 321.7500035903032 201.583746868985 L 368.82814295151644 201.5881424939042" marker-end="url(#arrow-end)" />
+<path class="conn" d="M 488.8281070484832 201.59969861019138 L 526.4843570484832 201.60343536378537" marker-end="url(#arrow-end)" />
+<path class="conn" d="M 543.8824122384324 221.60938936121315 L 397.3050805809607 290.4218965418197" marker-end="url(#arrow-end)" />
+<path class="conn" d="M 307.8948163726579 290.4218965418197 L 146.8082894154856 221.59373563878668" marker-end="url(#arrow-end)" />
+</svg>
