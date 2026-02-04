@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html lang="es">
+	<head>
+		<title>[Titulo]</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas{border:1px solid grey;}
+		</style>
+	</head>
+	<body>
+		<canvas></canvas>
+		<button>Guardar</button>
+		<script>
+			let lienzo = document.querySelector("canvas");
+			let contexto = lienzo.getContext("2d");
+			
+			lienzo.width = 512
+			lienzo.height = 512
+			
+			let imagen = new Image()									// CREO UNA NUEVA IMAGEN EN MEMORIA
+			imagen.src = "jocarsismo.png"								// INDICO QUE ARCHIVO CARGA ESA IMAGEN
+			
+			imagen.onload = function(){									// SOLO CUANDO LA IMAGEN HAYA CARGARDO	
+				contexto.drawImage(imagen,6,6,500,500)					// PINTO LA IMAGEN EN EL CANVAS
+			}			
+			let boton = document.querySelector("button");
+			boton.onclick = function(){
+				let enlace = document.createElement("a");
+				enlace.download = "canvas.png";
+				enlace.href = lienzo.toDataURL("image/png", 0.95);
+				enlace.click();
+			}
+		</script>
+	</body>
+</html>

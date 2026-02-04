@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html lang="es">
+	<head>
+		<title>[Titulo]</title>
+		<meta charset="UTF-8">
+		<style>
+			canvas{border:1px solid grey;}
+		</style>
+	</head>
+	<body>
+		<canvas></canvas>
+		<script>
+			let lienzo = document.querySelector("canvas");
+			let contexto = lienzo.getContext("2d");
+			lienzo.width = 512
+			lienzo.height = 512
+			// CUANDO MUEVA EL RATON POR EL LIENZO
+			lienzo.onmousemove = function(e){
+				contexto.fillRect(e.offsetX,e.offsetY,3,3)
+			}
+			contexto.stroke()
+		</script>
+	</body>
+</html>

@@ -1,0 +1,1868 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Canvas - Valentín De Gennaro (v3.0)</title>
+  <style>
+    :root{
+      --bg:#0f1115; --panel:#141823; --panel2:#0c0f16;
+      --border:#252c3f; --text:#e9edf7; --muted:#a7b0c6;
+      --accent:#5b8cff; --danger:#ff5b6b; --ok:#39d98a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background:linear-gradient(180deg,var(--bg),#0b0d12);
+      color:var(--text);
+      overflow:hidden;
+    }
+    .app{
+      height:100%; display:grid;
+      grid-template-rows: 48px 1fr 28px;
+      grid-template-columns: 300px 1fr 360px;
+      grid-template-areas: "top top top" "left center right" "status status status";
+      gap:10px; padding:10px;
+    }
+    .topbar{
+      grid-area:top; background:var(--panel); border:1px solid var(--border);
+      border-radius:14px; display:flex; align-items:center; justify-content:space-between;
+      padding:8px 10px; box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+    .dot{width:10px; height:10px; border-radius:999px; background:var(--accent); box-shadow:0 0 0 3px rgba(91,140,255,.15)}
+    .top-actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .btn{
+      background:var(--panel2); border:1px solid var(--border); color:var(--text);
+      border-radius:10px; padding:8px 10px; cursor:pointer; font-size:13px;
+      display:inline-flex; align-items:center; gap:8px; user-select:none;
+    }
+    .btn:hover{border-color:#33405d}
+    .btn.primary{background:rgba(91,140,255,.12); border-color:rgba(91,140,255,.35)}
+    .btn.danger{background:rgba(255,91,107,.12); border-color:rgba(255,91,107,.35)}
+    .btn.ok{background:rgba(57,217,138,.12); border-color:rgba(57,217,138,.35)}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+    .sep{width:1px; height:22px; background:var(--border); margin:0 4px}
+
+    .panel{
+      background:var(--panel); border:1px solid var(--border); border-radius:14px;
+      display:flex; flex-direction:column; min-height:0; overflow:hidden;
+    }
+    .panel h3{
+      margin:0; font-size:13px; color:var(--muted); padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,0));
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .content{padding:12px; overflow:auto; min-height:0;}
+    .left{grid-area:left} .right{grid-area:right}
+
+    .stage{
+      grid-area:center;
+      background: radial-gradient(1000px 600px at 50% 10%, rgba(91,140,255,.10), transparent 60%),
+                  linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,0));
+      border:1px solid var(--border); border-radius:14px; display:grid;
+      grid-template-rows:auto 1fr; overflow:hidden; min-height:0;
+    }
+    .stage-toolbar{
+      display:flex; gap:10px; align-items:center; padding:10px;
+      border-bottom:1px solid var(--border);
+      background:rgba(20,24,35,.65);
+      backdrop-filter: blur(10px);
+      flex-wrap:wrap;
+    }
+    .field{display:flex; flex-direction:column; gap:6px; min-width:100px;}
+    .field label{font-size:12px; color:var(--muted);}
+    .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+    input[type="range"]{width:130px}
+    input[type="color"]{width:44px; height:34px; border:none; background:transparent; padding:0; cursor:pointer;}
+    select, input[type="number"], input[type="text"]{
+      background:var(--panel2); border:1px solid var(--border); color:var(--text);
+      border-radius:10px; padding:8px 10px; font-size:13px; outline:none;
+    }
+
+    .canvas-wrap{
+      position:relative; display:flex; align-items:center; justify-content:center;
+      overflow:hidden; min-height:0;
+    }
+    .checker{
+      width:100%; height:100%; position:absolute; inset:0; opacity:.6; pointer-events:none;
+      background:
+        linear-gradient(45deg, rgba(255,255,255,.06) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,.06) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,.06) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.06) 75%);
+      background-size: 24px 24px; background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+    }
+    .view{
+      position:relative;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+    canvas{
+      border:1px solid rgba(255,255,255,.10); border-radius:12px;
+      box-shadow: 0 18px 48px rgba(0,0,0,.45); image-rendering: pixelated;
+      display:block;
+    }
+    #lienzo_overlay{
+      position:absolute; left:0; top:0;
+      pointer-events:none;
+    }
+
+    .toolgrid{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+    .toolbtn{justify-content:center; width:100%;}
+    .toolbtn.active{background:rgba(91,140,255,.14); border-color:rgba(91,140,255,.45);}
+
+    .hint{color:var(--muted); font-size:12px; line-height:1.35}
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size:11px; padding:2px 6px;
+      border:1px solid var(--border); border-radius:6px; background:rgba(0,0,0,.25);
+    }
+    .pill{font-size:12px; color:var(--muted); border:1px solid var(--border); padding:4px 8px; border-radius:999px; background:rgba(0,0,0,.18);}
+
+    .status{
+      grid-area:status; background:rgba(20,24,35,.75); border:1px solid var(--border);
+      border-radius:14px; display:flex; align-items:center; justify-content:space-between;
+      padding:6px 10px; font-size:12px; color:var(--muted);
+    }
+    .status strong{color:var(--text); font-weight:600}
+
+    /* Right panel tabs */
+    .tabs{display:flex; gap:8px; align-items:center;}
+    .tabbtn{
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border); background:rgba(0,0,0,.18); color:var(--muted);
+      cursor:pointer;
+    }
+    .tabbtn.active{color:var(--text); border-color:rgba(91,140,255,.45); background:rgba(91,140,255,.12)}
+    .section{display:none}
+    .section.active{display:block}
+
+    /* Layers list */
+    .layers{
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .layer{
+      border:1px solid var(--border); border-radius:12px; padding:10px;
+      background:rgba(0,0,0,.18);
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .layer-top{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .layer-name{
+      display:flex; align-items:center; gap:8px; min-width:0; flex:1;
+    }
+    .layer-name input{
+      width:100%;
+      background:var(--panel2); border:1px solid var(--border); color:var(--text);
+      border-radius:10px; padding:7px 10px; font-size:13px; outline:none;
+    }
+    .layer-controls{
+      display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+    }
+    .iconbtn{
+      width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;
+      border-radius:10px; border:1px solid var(--border); background:var(--panel2); cursor:pointer;
+    }
+    .iconbtn:hover{border-color:#33405d}
+    .iconbtn.active{border-color:rgba(91,140,255,.45); background:rgba(91,140,255,.12)}
+    .mini{font-size:12px; color:var(--muted)}
+    .two-col{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .hr{height:1px; background:var(--border); margin:12px 0}
+
+    @media (max-width: 1100px){
+      body{overflow:auto}
+      .app{height:auto; grid-template-rows: 48px auto auto auto; grid-template-columns: 1fr; grid-template-areas: "top" "center" "left" "right" "status";}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span>Editor DAM</span>
+      <span class="pill" id="info_doc">512×512</span>
+      <span class="pill" id="info_layer">Capa: 1</span>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="btn_abrir">📂 Abrir imagen</button>
+      <button class="btn primary" id="btn_guardar">💾 Guardar PNG</button>
+      <button class="btn" id="btn_guardar_proyecto">🧩 Guardar proyecto</button>
+      <button class="btn" id="btn_abrir_proyecto">📦 Abrir proyecto</button>
+      <span class="sep"></span>
+      <button class="btn" id="btn_deshacer" disabled>↩ Undo</button>
+      <button class="btn" id="btn_rehacer" disabled>↪ Redo</button>
+      <span class="sep"></span>
+      <button class="btn danger" id="btn_limpiar">🗑 Limpiar</button>
+    </div>
+  </div>
+
+  <div class="panel left">
+    <h3>Herramientas <span class="pill" id="pill_tool">Brush</span></h3>
+    <div class="content">
+      <div class="toolgrid">
+        <button class="btn toolbtn active" data-tool="brush">🖌 Pincel</button>
+        <button class="btn toolbtn" data-tool="eraser">🧽 Borrador</button>
+        <button class="btn toolbtn" data-tool="line">📏 Línea</button>
+        <button class="btn toolbtn" data-tool="rect">⬜ Rectángulo</button>
+        <button class="btn toolbtn" data-tool="ellipse">⚪ Elipse</button>
+        <button class="btn toolbtn" data-tool="bucket">🪣 Relleno</button>
+        <button class="btn toolbtn" data-tool="gradient">🌈 Degradado</button>
+        <button class="btn toolbtn" data-tool="picker">💉 Gotero</button>
+        <button class="btn toolbtn" data-tool="select">🔲 Selección</button>
+        <button class="btn toolbtn" data-tool="move">✋ Mover</button>
+        <button class="btn toolbtn" data-tool="text">🔤 Texto</button>
+        <button class="btn toolbtn" data-tool="crop">✂️ Recortar</button>
+        <button class="btn toolbtn" data-tool="hand">🖐 Pan</button>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="hint">
+        Atajos:
+        <div style="margin-top:8px; display:grid; gap:6px;">
+          <div><span class="kbd">B</span> Pincel, <span class="kbd">E</span> Borrador, <span class="kbd">G</span> Degradado</div>
+          <div><span class="kbd">M</span> Selección, <span class="kbd">V</span> Mover, <span class="kbd">T</span> Texto</div>
+          <div><span class="kbd">C</span> Recortar, <span class="kbd">H</span> Pan</div>
+          <div><span class="kbd">Ctrl</span>+<span class="kbd">Z</span> Deshacer, <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">Z</span> Rehacer</div>
+          <div><span class="kbd">Rueda</span> Zoom, <span class="kbd">Espacio</span> Pan temporal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-toolbar">
+      <div class="field">
+        <label>Color</label>
+        <div class="row">
+          <input type="color" id="input_color" value="#ffffff" />
+          <input type="text" id="input_hex" value="#ffffff" style="width:90px" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Color 2</label>
+        <div class="row">
+          <input type="color" id="input_color2" value="#000000" />
+          <input type="text" id="input_hex2" value="#000000" style="width:90px" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tamaño</label>
+        <div class="row">
+          <input type="range" id="input_tamano" min="1" max="120" value="12" />
+          <span class="pill" id="lbl_tamano">12px</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Opacidad</label>
+        <div class="row">
+          <input type="range" id="input_opacity" min="1" max="100" value="100" />
+          <span class="pill" id="lbl_opacity">100%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Zoom</label>
+        <div class="row">
+          <button class="btn" id="btn_zoom_out">-</button>
+          <button class="btn" id="btn_zoom_reset">100%</button>
+          <button class="btn" id="btn_zoom_in">+</button>
+        </div>
+      </div>
+
+      <input type="file" id="archivo_input" accept="image/*" hidden />
+      <input type="file" id="archivo_proyecto" accept=".mcdam,json" hidden />
+    </div>
+
+    <div class="canvas-wrap" id="contenedor_canvas">
+      <div class="checker"></div>
+
+      <div class="view" id="view">
+        <canvas id="lienzo_principal" width="512" height="512"></canvas>
+        <canvas id="lienzo_overlay" width="512" height="512"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel right">
+    <h3>
+      <span>Ajustes</span>
+      <span class="tabs">
+        <button class="tabbtn active" data-tab="tab_doc">Documento</button>
+        <button class="tabbtn" data-tab="tab_layers">Capas</button>
+      </span>
+    </h3>
+
+    <div class="content">
+      <!-- TAB Documento -->
+      <div class="section active" id="tab_doc">
+
+        <div class="field">
+          <label>Aplicar a</label>
+          <div class="row">
+            <select id="select_scope">
+              <option value="active">Capa activa</option>
+              <option value="all">Todas las capas</option>
+              <option value="merged">Capa fusionada (vista)</option>
+            </select>
+          </div>
+          <div class="mini">“Fusionada” aplica sobre el resultado final (no destructivo por capas).</div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Filtros rápidos</label>
+          <div class="row">
+            <button class="btn" id="btn_invertir">Invertir</button>
+            <button class="btn" id="btn_grises">Grises</button>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="field">
+          <label>Ajustes</label>
+          <div class="two-col">
+            <div>
+              <div class="mini">Brillo</div>
+              <input type="range" id="adj_brightness" min="-100" max="100" value="0" />
+            </div>
+            <div>
+              <div class="mini">Contraste</div>
+              <input type="range" id="adj_contrast" min="-100" max="100" value="0" />
+            </div>
+            <div>
+              <div class="mini">Tono (Hue)</div>
+              <input type="range" id="adj_hue" min="-180" max="180" value="0" />
+            </div>
+            <div>
+              <div class="mini">Saturación</div>
+              <input type="range" id="adj_sat" min="-100" max="100" value="0" />
+            </div>
+          </div>
+
+          <div style="height:10px"></div>
+          <div class="row">
+            <button class="btn ok" id="btn_aplicar_ajustes">Aplicar</button>
+            <button class="btn" id="btn_reset_ajustes">Reset</button>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Blur / Sharpen</label>
+          <div class="two-col">
+            <div>
+              <div class="mini">Blur (radio)</div>
+              <input type="range" id="flt_blur" min="0" max="10" value="0" />
+            </div>
+            <div>
+              <div class="mini">Sharpen (intens.)</div>
+              <input type="range" id="flt_sharpen" min="0" max="10" value="0" />
+            </div>
+          </div>
+          <div style="height:10px"></div>
+          <div class="row">
+            <button class="btn ok" id="btn_aplicar_filtros">Aplicar</button>
+            <button class="btn" id="btn_reset_filtros">Reset</button>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="field">
+          <label>Redimensionar lienzo</label>
+          <div class="row">
+            <input type="number" id="input_w" value="512" style="width:90px" />
+            <span>×</span>
+            <input type="number" id="input_h" value="512" style="width:90px" />
+            <button class="btn" id="btn_redimensionar">Ok</button>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="field">
+          <label>Transformaciones</label>
+          <div class="row">
+            <button class="btn" id="btn_rotar_90">⤾ 90°</button>
+            <button class="btn" id="btn_flip_h">⇆ Flip H</button>
+            <button class="btn" id="btn_flip_v">⇅ Flip V</button>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="field">
+          <label>Fondo base (capa nueva)</label>
+          <div class="row">
+            <button class="btn" id="btn_fondo_blanco">Blanco</button>
+            <button class="btn" id="btn_fondo_negro">Negro</button>
+            <button class="btn" id="btn_fondo_transp">Transparente</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB Capas -->
+      <div class="section" id="tab_layers">
+
+        <div class="row">
+          <button class="btn ok" id="btn_layer_add">➕ Nueva</button>
+          <button class="btn" id="btn_layer_dup">📄 Duplicar</button>
+          <button class="btn danger" id="btn_layer_del">🗑 Eliminar</button>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="field">
+          <label>Capas</label>
+          <div class="layers" id="layers_list"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="status">
+    <div>Herramienta: <strong id="status_tool">Pincel</strong> · Capa: <strong id="status_layer">1</strong></div>
+    <div>Zoom: <strong id="status_zoom">100%</strong> · Pan: <strong id="status_pan">0,0</strong></div>
+  </div>
+</div>
+
+<script>
+/*
+  Mini Canvas Editor (Web)
+  v3.0 "Photoshop-like essentials"
+  Autor: Valentín Antonio De Gennaro (base) + mejoras
+*/
+
+/* =========================
+   DOM
+========================= */
+const lienzo = document.getElementById("lienzo_principal");
+const ctx_view = lienzo.getContext("2d", { willReadFrequently:true });
+
+const overlay = document.getElementById("lienzo_overlay");
+const ctx_overlay = overlay.getContext("2d", { willReadFrequently:true });
+
+const contenedor = document.getElementById("contenedor_canvas");
+const view = document.getElementById("view");
+
+const input_color = document.getElementById("input_color");
+const input_hex = document.getElementById("input_hex");
+const input_color2 = document.getElementById("input_color2");
+const input_hex2 = document.getElementById("input_hex2");
+const input_tamano = document.getElementById("input_tamano");
+const lbl_tamano = document.getElementById("lbl_tamano");
+const input_opacity = document.getElementById("input_opacity");
+const lbl_opacity = document.getElementById("lbl_opacity");
+
+const archivo_input = document.getElementById("archivo_input");
+const archivo_proyecto = document.getElementById("archivo_proyecto");
+
+const btn_guardar = document.getElementById("btn_guardar");
+const btn_abrir = document.getElementById("btn_abrir");
+const btn_deshacer = document.getElementById("btn_deshacer");
+const btn_rehacer = document.getElementById("btn_rehacer");
+const btn_limpiar = document.getElementById("btn_limpiar");
+const btn_guardar_proyecto = document.getElementById("btn_guardar_proyecto");
+const btn_abrir_proyecto = document.getElementById("btn_abrir_proyecto");
+
+const pill_tool = document.getElementById("pill_tool");
+const info_doc = document.getElementById("info_doc");
+const info_layer = document.getElementById("info_layer");
+
+/* Tabs */
+document.querySelectorAll(".tabbtn").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll(".tabbtn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    const id = b.dataset.tab;
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  });
+});
+
+/* =========================
+   Estado global
+========================= */
+let herramienta_actual = "brush";
+let dibujando = false;
+let zoom_nivel = 1;
+let pan = {x:0, y:0};
+let espacio_pan_temporal = false;
+
+let pos_inicio = {x:0, y:0};
+let pos_mouse = {x:0, y:0};
+
+let seleccion = null; // {x,y,w,h} en coords canvas
+let seleccion_arrastrando = false;
+let move_payload = null; // {imageData, x,y,w,h, offsetX, offsetY}
+
+let crop_rect = null; // {x,y,w,h}
+
+/* Layers */
+let layers = [];
+let active_layer = 0;
+let layer_seq = 1;
+
+/* Historial */
+const pila_deshacer = [];
+const pila_rehacer = [];
+const LIMITE_HISTORIAL = 20;
+
+/* =========================
+   Utilidades
+========================= */
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function round2(v){ return Math.round(v*100)/100; }
+function uid(){ return Math.random().toString(16).slice(2)+Date.now().toString(16); }
+
+function setTool(name, labelText){
+  herramienta_actual = name;
+  document.getElementById("status_tool").textContent = labelText || name;
+  pill_tool.textContent = name.toUpperCase();
+  document.querySelectorAll(".toolbtn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.tool === name);
+  });
+}
+
+function setViewTransform(){
+  view.style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${zoom_nivel})`;
+  document.getElementById("status_zoom").textContent = Math.round(zoom_nivel*100) + "%";
+  document.getElementById("status_pan").textContent = `${Math.round(pan.x)},${Math.round(pan.y)}`;
+}
+
+function getCoordenadas(e){
+  const rect = lienzo.getBoundingClientRect();
+  const escala_x = lienzo.width / rect.width;
+  const escala_y = lienzo.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * escala_x,
+    y: (e.clientY - rect.top) * escala_y
+  };
+}
+
+function actualizarInfoDoc(){
+  info_doc.textContent = `${lienzo.width}×${lienzo.height}`;
+  document.getElementById("input_w").value = lienzo.width;
+  document.getElementById("input_h").value = lienzo.height;
+}
+
+function actualizarInfoLayer(){
+  document.getElementById("status_layer").textContent = (active_layer+1);
+  info_layer.textContent = `Capa: ${active_layer+1}`;
+}
+
+/* =========================
+   Capas: creación y render
+========================= */
+function createLayer(name){
+  const c = document.createElement("canvas");
+  c.width = lienzo.width;
+  c.height = lienzo.height;
+  const cx = c.getContext("2d", { willReadFrequently:true });
+  return {
+    id: uid(),
+    name: name || `Capa ${layer_seq++}`,
+    canvas: c,
+    ctx: cx,
+    visible: true,
+    opacity: 1,
+    blendMode: "source-over" // Normal
+  };
+}
+
+function blendModeToComposite(m){
+  // subset práctico -> canvas globalCompositeOperation
+  switch(m){
+    case "Normal": return "source-over";
+    case "Multiply": return "multiply";
+    case "Screen": return "screen";
+    case "Overlay": return "overlay";
+    case "Darken": return "darken";
+    case "Lighten": return "lighten";
+    case "Difference": return "difference";
+    default: return "source-over";
+  }
+}
+
+function renderComposite(){
+  ctx_view.save();
+  ctx_view.setTransform(1,0,0,1,0,0);
+  ctx_view.clearRect(0,0,lienzo.width,lienzo.height);
+
+  for(const L of layers){
+    if(!L.visible) continue;
+    ctx_view.globalAlpha = L.opacity;
+    ctx_view.globalCompositeOperation = L.blendMode;
+    ctx_view.drawImage(L.canvas, 0,0);
+  }
+  ctx_view.restore();
+  ctx_view.globalAlpha = 1;
+  ctx_view.globalCompositeOperation = "source-over";
+}
+
+function ensureBase(){
+  if(layers.length===0){
+    layers.push(createLayer("Capa 1"));
+    active_layer = 0;
+    refreshLayersUI();
+    renderComposite();
+  }
+}
+
+/* =========================
+   Layers UI
+========================= */
+const layers_list = document.getElementById("layers_list");
+
+function refreshLayersUI(){
+  layers_list.innerHTML = "";
+
+  layers.slice().reverse().forEach((L, idxRev)=>{
+    const idx = layers.length - 1 - idxRev;
+
+    const el = document.createElement("div");
+    el.className = "layer";
+    el.style.borderColor = (idx===active_layer) ? "rgba(91,140,255,.55)" : "var(--border)";
+    el.style.background = (idx===active_layer) ? "rgba(91,140,255,.08)" : "rgba(0,0,0,.18)";
+    el.dataset.idx = idx;
+
+    const top = document.createElement("div");
+    top.className = "layer-top";
+
+    const nameWrap = document.createElement("div");
+    nameWrap.className = "layer-name";
+
+    const eye = document.createElement("button");
+    eye.className = "iconbtn" + (L.visible ? " active" : "");
+    eye.title = "Visibilidad";
+    eye.textContent = L.visible ? "👁" : "🚫";
+    eye.addEventListener("click", (ev)=>{
+      ev.stopPropagation();
+      L.visible = !L.visible;
+      refreshLayersUI();
+      renderComposite();
+      pushHistory("Visibilidad capa");
+    });
+
+    const input = document.createElement("input");
+    input.value = L.name;
+    input.addEventListener("input", ()=>{
+      L.name = input.value;
+    });
+
+    nameWrap.appendChild(eye);
+    nameWrap.appendChild(input);
+
+    const pick = document.createElement("button");
+    pick.className = "iconbtn";
+    pick.title = "Seleccionar capa";
+    pick.textContent = "🎯";
+
+    pick.addEventListener("click",(ev)=>{
+      ev.stopPropagation();
+      active_layer = idx;
+      actualizarInfoLayer();
+      refreshLayersUI();
+    });
+
+    top.appendChild(nameWrap);
+    top.appendChild(pick);
+
+    const controls = document.createElement("div");
+    controls.className = "layer-controls";
+
+    const selBlend = document.createElement("select");
+    ["Normal","Multiply","Screen","Overlay","Darken","Lighten","Difference"].forEach(m=>{
+      const o = document.createElement("option");
+      o.value = m; o.textContent = m;
+      selBlend.appendChild(o);
+    });
+    // map current blendMode -> label
+    const reverseMap = {
+      "source-over":"Normal",
+      "multiply":"Multiply",
+      "screen":"Screen",
+      "overlay":"Overlay",
+      "darken":"Darken",
+      "lighten":"Lighten",
+      "difference":"Difference"
+    };
+    selBlend.value = reverseMap[L.blendMode] || "Normal";
+    selBlend.addEventListener("change", ()=>{
+      L.blendMode = blendModeToComposite(selBlend.value);
+      renderComposite();
+      pushHistory("Blend mode");
+    });
+
+    const op = document.createElement("input");
+    op.type = "range"; op.min=0; op.max=100; op.value = Math.round(L.opacity*100);
+    op.addEventListener("input", ()=>{
+      L.opacity = op.value/100;
+      renderComposite();
+    });
+    op.addEventListener("change", ()=> pushHistory("Opacidad capa"));
+
+    const up = document.createElement("button");
+    up.className = "iconbtn"; up.textContent = "⬆";
+    up.title = "Subir (arriba en pila)";
+    up.addEventListener("click",(ev)=>{
+      ev.stopPropagation();
+      if(idx >= layers.length-1) return;
+      const tmp = layers[idx]; layers[idx] = layers[idx+1]; layers[idx+1] = tmp;
+      if(active_layer===idx) active_layer=idx+1; else if(active_layer===idx+1) active_layer=idx;
+      refreshLayersUI(); renderComposite(); pushHistory("Reordenar capa");
+    });
+
+    const down = document.createElement("button");
+    down.className="iconbtn"; down.textContent="⬇";
+    down.title="Bajar (abajo en pila)";
+    down.addEventListener("click",(ev)=>{
+      ev.stopPropagation();
+      if(idx <= 0) return;
+      const tmp = layers[idx]; layers[idx] = layers[idx-1]; layers[idx-1] = tmp;
+      if(active_layer===idx) active_layer=idx-1; else if(active_layer===idx-1) active_layer=idx;
+      refreshLayersUI(); renderComposite(); pushHistory("Reordenar capa");
+    });
+
+    controls.appendChild(selBlend);
+    controls.appendChild(op);
+    controls.appendChild(up);
+    controls.appendChild(down);
+
+    el.appendChild(top);
+    el.appendChild(controls);
+
+    el.addEventListener("click", ()=>{
+      active_layer = idx;
+      actualizarInfoLayer();
+      refreshLayersUI();
+    });
+
+    layers_list.appendChild(el);
+  });
+
+  actualizarInfoLayer();
+}
+
+/* Botones de capas */
+document.getElementById("btn_layer_add").addEventListener("click", ()=>{
+  pushHistory("Nueva capa");
+  layers.push(createLayer());
+  active_layer = layers.length-1;
+  refreshLayersUI();
+  renderComposite();
+});
+
+document.getElementById("btn_layer_dup").addEventListener("click", ()=>{
+  if(!layers[active_layer]) return;
+  pushHistory("Duplicar capa");
+  const src = layers[active_layer];
+  const L = createLayer(src.name + " copia");
+  L.ctx.drawImage(src.canvas,0,0);
+  L.opacity = src.opacity;
+  L.blendMode = src.blendMode;
+  layers.splice(active_layer+1,0,L);
+  active_layer = active_layer+1;
+  refreshLayersUI();
+  renderComposite();
+});
+
+document.getElementById("btn_layer_del").addEventListener("click", ()=>{
+  if(layers.length<=1) return;
+  pushHistory("Eliminar capa");
+  layers.splice(active_layer,1);
+  active_layer = clamp(active_layer,0,layers.length-1);
+  refreshLayersUI();
+  renderComposite();
+});
+
+/* =========================
+   Historial (proyecto multicapa)
+========================= */
+function snapshotProject(){
+  return {
+    w: lienzo.width,
+    h: lienzo.height,
+    active: active_layer,
+    layer_seq,
+    layers: layers.map(L=>({
+      id:L.id,
+      name:L.name,
+      visible:L.visible,
+      opacity:L.opacity,
+      blendMode:L.blendMode,
+      dataURL: L.canvas.toDataURL("image/png")
+    }))
+  };
+}
+
+function restoreProject(snap){
+  resizeDocument(snap.w, snap.h, false);
+
+  layers = snap.layers.map(meta=>{
+    const L = createLayer(meta.name);
+    L.id = meta.id;
+    L.visible = meta.visible;
+    L.opacity = meta.opacity;
+    L.blendMode = meta.blendMode;
+
+    const img = new Image();
+    img.onload = ()=>{ L.ctx.clearRect(0,0,lienzo.width,lienzo.height); L.ctx.drawImage(img,0,0); renderComposite(); };
+    img.src = meta.dataURL;
+    return L;
+  });
+
+  active_layer = clamp(snap.active || 0, 0, layers.length-1);
+  layer_seq = snap.layer_seq || layer_seq;
+
+  refreshLayersUI();
+  renderComposite();
+}
+
+function pushHistory(reason){
+  try{
+    pila_deshacer.push(snapshotProject());
+    if(pila_deshacer.length > LIMITE_HISTORIAL) pila_deshacer.shift();
+    pila_rehacer.length = 0;
+    updateHistoryButtons();
+  }catch(e){
+    console.error("Historial:", e);
+  }
+}
+
+function updateHistoryButtons(){
+  btn_deshacer.disabled = pila_deshacer.length===0;
+  btn_rehacer.disabled = pila_rehacer.length===0;
+}
+
+btn_deshacer.addEventListener("click", ()=>{
+  if(pila_deshacer.length===0) return;
+  pila_rehacer.push(snapshotProject());
+  const snap = pila_deshacer.pop();
+  restoreProject(snap);
+  updateHistoryButtons();
+});
+
+btn_rehacer.addEventListener("click", ()=>{
+  if(pila_rehacer.length===0) return;
+  pila_deshacer.push(snapshotProject());
+  const snap = pila_rehacer.pop();
+  restoreProject(snap);
+  updateHistoryButtons();
+});
+
+/* =========================
+   Dibujo y herramientas
+========================= */
+function activeCtx(){ return layers[active_layer].ctx; }
+function applyStrokeStyle(ctx){
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = Number(input_tamano.value);
+  ctx.strokeStyle = input_color.value;
+  ctx.globalAlpha = Number(input_opacity.value)/100;
+}
+
+function applyFillStyle(ctx){
+  ctx.fillStyle = input_color.value;
+  ctx.globalAlpha = Number(input_opacity.value)/100;
+}
+
+function clearOverlay(){
+  ctx_overlay.setTransform(1,0,0,1,0,0);
+  ctx_overlay.clearRect(0,0,overlay.width,overlay.height);
+}
+
+function drawSelectionOverlay(){
+  if(!seleccion) return;
+  clearOverlay();
+  ctx_overlay.save();
+  ctx_overlay.setLineDash([6,4]);
+  ctx_overlay.strokeStyle = "rgba(233,237,247,.9)";
+  ctx_overlay.lineWidth = 1;
+  ctx_overlay.strokeRect(seleccion.x+0.5, seleccion.y+0.5, seleccion.w, seleccion.h);
+  ctx_overlay.restore();
+}
+
+function drawCropOverlay(){
+  if(!crop_rect) return;
+  clearOverlay();
+  ctx_overlay.save();
+  ctx_overlay.fillStyle = "rgba(0,0,0,.45)";
+  ctx_overlay.fillRect(0,0,overlay.width,overlay.height);
+  ctx_overlay.clearRect(crop_rect.x, crop_rect.y, crop_rect.w, crop_rect.h);
+  ctx_overlay.setLineDash([6,4]);
+  ctx_overlay.strokeStyle = "rgba(91,140,255,.95)";
+  ctx_overlay.lineWidth = 2;
+  ctx_overlay.strokeRect(crop_rect.x+0.5, crop_rect.y+0.5, crop_rect.w, crop_rect.h);
+  ctx_overlay.restore();
+}
+
+function stampSoftBrush(ctx, x, y, radius, color){
+  const r = Math.max(1, radius);
+  const g = ctx.createRadialGradient(x,y,0, x,y,r);
+  g.addColorStop(0, color);
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fill();
+}
+
+function drawBrushSegment(ctx, x, y, eraser=false){
+  const op = Number(input_opacity.value)/100;
+  const r = Number(input_tamano.value)/2;
+
+  ctx.save();
+  ctx.globalAlpha = op;
+  if(eraser){
+    ctx.globalCompositeOperation = "destination-out";
+    stampSoftBrush(ctx, x,y, r, "rgba(0,0,0,1)");
+  }else{
+    ctx.globalCompositeOperation = "source-over";
+    stampSoftBrush(ctx, x,y, r, input_color.value);
+  }
+  ctx.restore();
+}
+
+/* Flood fill con tolerancia básica */
+function hexToRgba(hex){
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return [r,g,b,255];
+}
+function colorDist(a,b){ // a,b=[r,g,b,a]
+  return Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])+Math.abs(a[2]-b[2])+Math.abs(a[3]-b[3]);
+}
+function ejecutarRelleno(layerCtx, x0, y0, color_hex, tolerance=0){
+  const img = layerCtx.getImageData(0,0,lienzo.width,lienzo.height);
+  const data = img.data;
+  const w = lienzo.width, h = lienzo.height;
+
+  const xStart = Math.floor(x0), yStart = Math.floor(y0);
+  if(xStart<0||xStart>=w||yStart<0||yStart>=h) return;
+
+  const target = hexToRgba(color_hex);
+  const idx0 = (yStart*w + xStart)*4;
+  const base = [data[idx0],data[idx0+1],data[idx0+2],data[idx0+3]];
+  if(colorDist(base,target)===0) return;
+
+  const stack = [[xStart,yStart]];
+  const seen = new Uint8Array(w*h);
+
+  while(stack.length){
+    const [x,y] = stack.pop();
+    if(x<0||x>=w||y<0||y>=h) continue;
+    const key = y*w+x;
+    if(seen[key]) continue;
+    seen[key]=1;
+
+    const i = key*4;
+    const cur = [data[i],data[i+1],data[i+2],data[i+3]];
+    if(colorDist(cur, base) <= tolerance){
+      data[i]=target[0]; data[i+1]=target[1]; data[i+2]=target[2]; data[i+3]=target[3];
+      stack.push([x+1,y]); stack.push([x-1,y]); stack.push([x,y+1]); stack.push([x,y-1]);
+    }
+  }
+  layerCtx.putImageData(img,0,0);
+}
+
+function ejecutarGotero(x,y){
+  const pix = ctx_view.getImageData(Math.floor(x),Math.floor(y),1,1).data;
+  const hex = "#"+("0"+pix[0].toString(16)).slice(-2)+("0"+pix[1].toString(16)).slice(-2)+("0"+pix[2].toString(16)).slice(-2);
+  input_color.value = hex; input_hex.value = hex;
+}
+
+function previewShape(x,y){
+  clearOverlay();
+  ctx_overlay.save();
+  applyStrokeStyle(ctx_overlay);
+  ctx_overlay.globalAlpha = 1;
+  ctx_overlay.beginPath();
+
+  if(herramienta_actual==="line"){
+    ctx_overlay.moveTo(pos_inicio.x,pos_inicio.y);
+    ctx_overlay.lineTo(x,y);
+    ctx_overlay.stroke();
+  }
+  if(herramienta_actual==="rect"){
+    ctx_overlay.strokeRect(pos_inicio.x,pos_inicio.y, x-pos_inicio.x, y-pos_inicio.y);
+  }
+  if(herramienta_actual==="ellipse"){
+    const rx = (x-pos_inicio.x)/2;
+    const ry = (y-pos_inicio.y)/2;
+    const cx = pos_inicio.x + rx;
+    const cy = pos_inicio.y + ry;
+    ctx_overlay.beginPath();
+    ctx_overlay.ellipse(cx,cy, Math.abs(rx), Math.abs(ry), 0, 0, Math.PI*2);
+    ctx_overlay.stroke();
+  }
+  if(herramienta_actual==="gradient"){
+    ctx_overlay.setLineDash([6,4]);
+    ctx_overlay.strokeStyle = "rgba(233,237,247,.9)";
+    ctx_overlay.lineWidth = 1;
+    ctx_overlay.beginPath();
+    ctx_overlay.moveTo(pos_inicio.x,pos_inicio.y);
+    ctx_overlay.lineTo(x,y);
+    ctx_overlay.stroke();
+  }
+  if(herramienta_actual==="select"){
+    seleccion = {
+      x: Math.min(pos_inicio.x,x),
+      y: Math.min(pos_inicio.y,y),
+      w: Math.abs(x-pos_inicio.x),
+      h: Math.abs(y-pos_inicio.y)
+    };
+    drawSelectionOverlay();
+  }
+  if(herramienta_actual==="crop"){
+    crop_rect = {
+      x: Math.min(pos_inicio.x,x),
+      y: Math.min(pos_inicio.y,y),
+      w: Math.abs(x-pos_inicio.x),
+      h: Math.abs(y-pos_inicio.y)
+    };
+    drawCropOverlay();
+  }
+  ctx_overlay.restore();
+}
+
+function applyShapeToLayer(){
+  const ctx = activeCtx();
+  ctx.save();
+  applyStrokeStyle(ctx);
+  ctx.globalCompositeOperation = "source-over";
+  if(seleccion){
+    ctx.beginPath();
+    ctx.rect(seleccion.x, seleccion.y, seleccion.w, seleccion.h);
+    ctx.clip();
+  }
+
+  if(herramienta_actual==="line"){
+    ctx.beginPath();
+    ctx.moveTo(pos_inicio.x,pos_inicio.y);
+    ctx.lineTo(pos_mouse.x,pos_mouse.y);
+    ctx.stroke();
+  }
+  if(herramienta_actual==="rect"){
+    ctx.strokeRect(pos_inicio.x,pos_inicio.y, pos_mouse.x-pos_inicio.x, pos_mouse.y-pos_inicio.y);
+  }
+  if(herramienta_actual==="ellipse"){
+    const rx = (pos_mouse.x-pos_inicio.x)/2;
+    const ry = (pos_mouse.y-pos_inicio.y)/2;
+    const cx = pos_inicio.x + rx;
+    const cy = pos_inicio.y + ry;
+    ctx.beginPath();
+    ctx.ellipse(cx,cy, Math.abs(rx), Math.abs(ry), 0, 0, Math.PI*2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function applyGradientToLayer(){
+  const ctx = activeCtx();
+  ctx.save();
+  ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = Number(input_opacity.value)/100;
+
+  if(seleccion){
+    ctx.beginPath();
+    ctx.rect(seleccion.x, seleccion.y, seleccion.w, seleccion.h);
+    ctx.clip();
+  }
+  const g = ctx.createLinearGradient(pos_inicio.x,pos_inicio.y, pos_mouse.x,pos_mouse.y);
+  g.addColorStop(0, input_color.value);
+  g.addColorStop(1, input_color2.value);
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,lienzo.width,lienzo.height);
+  ctx.restore();
+}
+
+function applyTextAt(x,y){
+  const text = prompt("Texto:", "Hola");
+  if(!text) return;
+  const size = Number(input_tamano.value) * 2;
+  const ctx = activeCtx();
+  ctx.save();
+  ctx.globalAlpha = Number(input_opacity.value)/100;
+  ctx.fillStyle = input_color.value;
+  ctx.font = `${size}px system-ui, -apple-system, sans-serif`;
+  if(seleccion){
+    ctx.beginPath();
+    ctx.rect(seleccion.x, seleccion.y, seleccion.w, seleccion.h);
+    ctx.clip();
+  }
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+/* =========================
+   Eventos pointer
+========================= */
+contenedor.addEventListener("pointerdown", (e)=>{
+  contenedor.setPointerCapture(e.pointerId);
+  const coords = getCoordenadas(e);
+  pos_inicio = coords;
+  pos_mouse = coords;
+
+  // Pan temporal con espacio
+  if(espacio_pan_temporal || herramienta_actual==="hand"){
+    dibujando = true;
+    pos_inicio = {x:e.clientX, y:e.clientY}; // pantalla
+    return;
+  }
+
+  if(herramienta_actual==="picker"){
+    ejecutarGotero(coords.x, coords.y);
+    return;
+  }
+
+  if(herramienta_actual==="bucket"){
+    pushHistory("Relleno");
+    ejecutarRelleno(activeCtx(), coords.x, coords.y, input_color.value, 0);
+    renderComposite();
+    return;
+  }
+
+  if(herramienta_actual==="text"){
+    pushHistory("Texto");
+    applyTextAt(coords.x, coords.y);
+    renderComposite();
+    return;
+  }
+
+  if(herramienta_actual==="move"){
+    if(!seleccion) return;
+    // preparar payload del área seleccionada
+    const ctx = activeCtx();
+    const x = Math.floor(seleccion.x), y = Math.floor(seleccion.y);
+    const w = Math.floor(seleccion.w), h = Math.floor(seleccion.h);
+    if(w<=0||h<=0) return;
+    pushHistory("Mover selección");
+    const id = ctx.getImageData(x,y,w,h);
+    // borramos esa zona
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "rgba(0,0,0,1)";
+    ctx.fillRect(x,y,w,h);
+    ctx.restore();
+    move_payload = { imageData:id, x, y, w, h, offsetX: coords.x-x, offsetY: coords.y-y };
+    dibujando = true;
+    renderComposite();
+    drawSelectionOverlay();
+    return;
+  }
+
+  // selección / crop / shapes preview
+  if(["select","crop","line","rect","ellipse","gradient"].includes(herramienta_actual)){
+    dibujando = true;
+    clearOverlay();
+    if(herramienta_actual==="select"){ seleccion = {x:coords.x,y:coords.y,w:0,h:0}; }
+    if(herramienta_actual==="crop"){ crop_rect = {x:coords.x,y:coords.y,w:0,h:0}; }
+    return;
+  }
+
+  // brush / eraser
+  if(herramienta_actual==="brush" || herramienta_actual==="eraser"){
+    dibujando = true;
+    pushHistory(herramienta_actual==="brush" ? "Pincel" : "Borrador");
+    drawBrushSegment(activeCtx(), coords.x, coords.y, herramienta_actual==="eraser");
+    renderComposite();
+  }
+});
+
+contenedor.addEventListener("pointermove", (e)=>{
+  const coords = getCoordenadas(e);
+  pos_mouse = coords;
+
+  if(!dibujando){
+    return;
+  }
+
+  // pan
+  if(espacio_pan_temporal || herramienta_actual==="hand"){
+    const dx = e.clientX - pos_inicio.x;
+    const dy = e.clientY - pos_inicio.y;
+    pan.x += dx;
+    pan.y += dy;
+    pos_inicio = {x:e.clientX,y:e.clientY};
+    setViewTransform();
+    return;
+  }
+
+  // mover selección payload
+  if(herramienta_actual==="move" && move_payload){
+    // mostrar overlay de selección en nueva posición
+    seleccion = {
+      x: coords.x - move_payload.offsetX,
+      y: coords.y - move_payload.offsetY,
+      w: move_payload.w,
+      h: move_payload.h
+    };
+    drawSelectionOverlay();
+    renderComposite();
+    // previsualizamos moviéndolo en overlay
+    clearOverlay();
+    drawSelectionOverlay();
+    ctx_overlay.putImageData(move_payload.imageData, Math.floor(seleccion.x), Math.floor(seleccion.y));
+    return;
+  }
+
+  // brush / eraser
+  if(herramienta_actual==="brush" || herramienta_actual==="eraser"){
+    drawBrushSegment(activeCtx(), coords.x, coords.y, herramienta_actual==="eraser");
+    renderComposite();
+    return;
+  }
+
+  // preview shapes / selection / crop / gradient
+  previewShape(coords.x, coords.y);
+});
+
+window.addEventListener("pointerup", ()=>{
+  if(!dibujando) return;
+  dibujando = false;
+
+  // finalizar move
+  if(herramienta_actual==="move" && move_payload){
+    const ctx = activeCtx();
+    ctx.putImageData(move_payload.imageData, Math.floor(seleccion.x), Math.floor(seleccion.y));
+    move_payload = null;
+    clearOverlay();
+    drawSelectionOverlay();
+    renderComposite();
+    return;
+  }
+
+  // aplicar formas/gradiente
+  if(["line","rect","ellipse"].includes(herramienta_actual)){
+    pushHistory("Forma");
+    applyShapeToLayer();
+    clearOverlay();
+    drawSelectionOverlay();
+    renderComposite();
+  }
+
+  if(herramienta_actual==="gradient"){
+    pushHistory("Degradado");
+    applyGradientToLayer();
+    clearOverlay();
+    drawSelectionOverlay();
+    renderComposite();
+  }
+
+  // selección y crop se quedan en overlay
+  if(herramienta_actual==="select"){
+    drawSelectionOverlay();
+  }
+  if(herramienta_actual==="crop"){
+    drawCropOverlay();
+  }
+});
+
+/* =========================
+   Tool buttons
+========================= */
+document.querySelectorAll(".toolbtn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    setTool(btn.dataset.tool, btn.innerText);
+    document.getElementById("status_tool").textContent = btn.innerText;
+    if(herramienta_actual!=="select" && herramienta_actual!=="crop" && herramienta_actual!=="move"){
+      // no borramos selección al cambiar, pero sí el overlay si veníamos de crop/gradient previews
+      clearOverlay();
+      if(seleccion) drawSelectionOverlay();
+      if(crop_rect && herramienta_actual==="crop") drawCropOverlay();
+    }
+  });
+});
+
+/* =========================
+   Sincronización inputs
+========================= */
+input_color.addEventListener("input", ()=> input_hex.value = input_color.value);
+input_hex.addEventListener("input", ()=> input_color.value = input_hex.value);
+input_color2.addEventListener("input", ()=> input_hex2.value = input_color2.value);
+input_hex2.addEventListener("input", ()=> input_color2.value = input_hex2.value);
+
+input_tamano.addEventListener("input", ()=> lbl_tamano.textContent = input_tamano.value + "px");
+input_opacity.addEventListener("input", ()=> lbl_opacity.textContent = input_opacity.value + "%");
+
+/* =========================
+   Archivo: abrir/guardar imagen
+========================= */
+btn_guardar.addEventListener("click", ()=>{
+  // exporta la composición vista
+  const link = document.createElement("a");
+  link.download = `proyecto_dam_${Date.now()}.png`;
+  link.href = lienzo.toDataURL("image/png");
+  link.click();
+});
+
+btn_abrir.addEventListener("click", ()=> archivo_input.click());
+
+archivo_input.addEventListener("change", (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      pushHistory("Abrir imagen");
+      const L = layers[active_layer];
+      // colocamos centrada en capa activa
+      const escala = Math.min(lienzo.width/img.width, lienzo.height/img.height);
+      const w = img.width*escala, h = img.height*escala;
+      const x = (lienzo.width-w)/2, y = (lienzo.height-h)/2;
+      L.ctx.clearRect(0,0,lienzo.width,lienzo.height);
+      L.ctx.drawImage(img, x,y,w,h);
+      renderComposite();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  archivo_input.value = "";
+});
+
+/* =========================
+   Proyecto: guardar/abrir (JSON + PNG dataURL)
+========================= */
+btn_guardar_proyecto.addEventListener("click", ()=>{
+  const data = snapshotProject();
+  const blob = new Blob([JSON.stringify(data)], {type:"application/json"});
+  const link = document.createElement("a");
+  link.download = `mini_canvas_dam_${Date.now()}.mcdam`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+btn_abrir_proyecto.addEventListener("click", ()=> archivo_proyecto.click());
+
+archivo_proyecto.addEventListener("change", (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      pushHistory("Abrir proyecto");
+      restoreProject(data);
+      renderComposite();
+    }catch(err){
+      alert("Proyecto inválido.");
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  archivo_proyecto.value="";
+});
+
+/* =========================
+   Limpiar
+========================= */
+btn_limpiar.addEventListener("click", ()=>{
+  pushHistory("Limpiar capa activa");
+  layers[active_layer].ctx.clearRect(0,0,lienzo.width,lienzo.height);
+  renderComposite();
+});
+
+/* =========================
+   Zoom + Pan
+========================= */
+function setZoom(n){
+  zoom_nivel = clamp(n, 0.1, 8);
+  setViewTransform();
+}
+document.getElementById("btn_zoom_in").addEventListener("click", ()=> setZoom(zoom_nivel+0.1));
+document.getElementById("btn_zoom_out").addEventListener("click", ()=> setZoom(zoom_nivel-0.1));
+document.getElementById("btn_zoom_reset").addEventListener("click", ()=>{
+  zoom_nivel = 1; pan={x:0,y:0}; setViewTransform();
+});
+
+contenedor.addEventListener("wheel", (e)=>{
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.1 : 0.1;
+  if(e.ctrlKey || e.metaKey){
+    setZoom(zoom_nivel + delta/2);
+  }else{
+    setZoom(zoom_nivel + delta);
+  }
+}, {passive:false});
+
+/* Espacio = pan temporal */
+window.addEventListener("keydown", (e)=>{
+  if(e.code==="Space"){ espacio_pan_temporal=true; }
+});
+window.addEventListener("keyup", (e)=>{
+  if(e.code==="Space"){ espacio_pan_temporal=false; }
+});
+
+/* =========================
+   Ajustes y filtros (aplicar a scope)
+========================= */
+const select_scope = document.getElementById("select_scope");
+
+function iterateTargets(){
+  const scope = select_scope.value;
+  if(scope==="active") return [layers[active_layer]];
+  if(scope==="all") return layers.slice();
+  if(scope==="merged"){
+    // creamos una "capa temporal" con la vista y la volcamos a capa activa al aplicar
+    return [{__merged:true}];
+  }
+  return [layers[active_layer]];
+}
+
+function getMergedImageData(){
+  // render en canvas temporal
+  const temp = document.createElement("canvas");
+  temp.width = lienzo.width; temp.height = lienzo.height;
+  const tctx = temp.getContext("2d", { willReadFrequently:true });
+  // dibujar igual que renderComposite
+  for(const L of layers){
+    if(!L.visible) continue;
+    tctx.globalAlpha = L.opacity;
+    tctx.globalCompositeOperation = L.blendMode;
+    tctx.drawImage(L.canvas,0,0);
+  }
+  tctx.globalAlpha=1; tctx.globalCompositeOperation="source-over";
+  return {temp, tctx, img: tctx.getImageData(0,0,temp.width,temp.height)};
+}
+
+function applyImageDataToActiveFromMerged(imgData){
+  layers[active_layer].ctx.putImageData(imgData,0,0);
+  renderComposite();
+}
+
+function applyBrightnessContrast(idata, brightness, contrast){
+  // brightness [-100..100], contrast [-100..100]
+  const b = brightness;
+  const c = (contrast + 100) / 100;
+  const d = idata.data;
+
+  for(let i=0;i<d.length;i+=4){
+    // brightness
+    let r = d[i] + b;
+    let g = d[i+1] + b;
+    let bl = d[i+2] + b;
+
+    // contrast (simple)
+    r = (r - 128) * c + 128;
+    g = (g - 128) * c + 128;
+    bl = (bl - 128) * c + 128;
+
+    d[i] = clamp(r,0,255);
+    d[i+1] = clamp(g,0,255);
+    d[i+2] = clamp(bl,0,255);
+  }
+}
+
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h,s,l=(max+min)/2;
+  if(max===min){ h=0; s=0; }
+  else{
+    const d=max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d + (g<b?6:0); break;
+      case g: h=(b-r)/d + 2; break;
+      case b: h=(r-g)/d + 4; break;
+    }
+    h/=6;
+  }
+  return [h,s,l];
+}
+function hslToRgb(h,s,l){
+  function hue2rgb(p,q,t){
+    if(t<0) t+=1;
+    if(t>1) t-=1;
+    if(t<1/6) return p+(q-p)*6*t;
+    if(t<1/2) return q;
+    if(t<2/3) return p+(q-p)*(2/3-t)*6;
+    return p;
+  }
+  let r,g,b;
+  if(s===0){ r=g=b=l; }
+  else{
+    const q = l<0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l - q;
+    r = hue2rgb(p,q,h+1/3);
+    g = hue2rgb(p,q,h);
+    b = hue2rgb(p,q,h-1/3);
+  }
+  return [Math.round(r*255),Math.round(g*255),Math.round(b*255)];
+}
+
+function applyHueSaturation(idata, hueDeg, satDelta){
+  const d = idata.data;
+  const hueShift = hueDeg/360;
+  const sat = satDelta/100;
+  for(let i=0;i<d.length;i+=4){
+    const [h,s,l] = rgbToHsl(d[i],d[i+1],d[i+2]);
+    let nh = (h + hueShift) % 1; if(nh<0) nh+=1;
+    let ns = clamp(s + sat, 0, 1);
+    const [r,g,b] = hslToRgb(nh,ns,l);
+    d[i]=r; d[i+1]=g; d[i+2]=b;
+  }
+}
+
+function applyInvert(idata){
+  const d = idata.data;
+  for(let i=0;i<d.length;i+=4){
+    d[i]=255-d[i]; d[i+1]=255-d[i+1]; d[i+2]=255-d[i+2];
+  }
+}
+
+function applyGrayscale(idata){
+  const d = idata.data;
+  for(let i=0;i<d.length;i+=4){
+    const avg = (d[i]+d[i+1]+d[i+2])/3;
+    d[i]=avg; d[i+1]=avg; d[i+2]=avg;
+  }
+}
+
+function boxBlur(idata, radius){
+  if(radius<=0) return;
+  const w = lienzo.width, h = lienzo.height;
+  const src = idata.data;
+  const out = new Uint8ClampedArray(src.length);
+  const r = radius;
+
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      let rs=0,gs=0,bs=0,as=0,count=0;
+      for(let oy=-r;oy<=r;oy++){
+        for(let ox=-r;ox<=r;ox++){
+          const nx=x+ox, ny=y+oy;
+          if(nx<0||nx>=w||ny<0||ny>=h) continue;
+          const i=(ny*w+nx)*4;
+          rs+=src[i]; gs+=src[i+1]; bs+=src[i+2]; as+=src[i+3];
+          count++;
+        }
+      }
+      const o=(y*w+x)*4;
+      out[o]=rs/count; out[o+1]=gs/count; out[o+2]=bs/count; out[o+3]=as/count;
+    }
+  }
+  idata.data.set(out);
+}
+
+function sharpen(idata, amount){
+  if(amount<=0) return;
+  // kernel sharpen simple: [0,-1,0,-1,5,-1,0,-1,0] escalado por amount
+  const w=lienzo.width, h=lienzo.height;
+  const src = idata.data;
+  const out = new Uint8ClampedArray(src.length);
+  const a = amount/10; // 0..1
+  const k = [
+    0, -1*a, 0,
+    -1*a, 1+4*a, -1*a,
+    0, -1*a, 0
+  ];
+
+  function at(x,y,c){
+    x=clamp(x,0,w-1); y=clamp(y,0,h-1);
+    return src[(y*w+x)*4+c];
+  }
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      for(let c=0;c<3;c++){
+        const v =
+          at(x-1,y,c)*k[3] + at(x,y-1,c)*k[1] +
+          at(x,y,c)*k[4] +
+          at(x,y+1,c)*k[7] + at(x+1,y,c)*k[5];
+        out[(y*w+x)*4+c] = clamp(v,0,255);
+      }
+      out[(y*w+x)*4+3]=at(x,y,3);
+    }
+  }
+  idata.data.set(out);
+}
+
+function applyToTargets(mutator){
+  const scope = select_scope.value;
+  if(scope==="merged"){
+    pushHistory("Aplicar a fusionada");
+    const {img} = getMergedImageData();
+    mutator(img);
+    applyImageDataToActiveFromMerged(img);
+    return;
+  }
+
+  pushHistory("Aplicar ajuste/filtro");
+  for(const L of iterateTargets()){
+    const ctx = L.ctx;
+    const idata = ctx.getImageData(0,0,lienzo.width,lienzo.height);
+    mutator(idata);
+    ctx.putImageData(idata,0,0);
+  }
+  renderComposite();
+}
+
+/* Botones filtros rápidos */
+document.getElementById("btn_invertir").addEventListener("click", ()=> applyToTargets(applyInvert));
+document.getElementById("btn_grises").addEventListener("click", ()=> applyToTargets(applyGrayscale));
+
+/* Ajustes */
+document.getElementById("btn_aplicar_ajustes").addEventListener("click", ()=>{
+  const br = Number(document.getElementById("adj_brightness").value);
+  const co = Number(document.getElementById("adj_contrast").value);
+  const hu = Number(document.getElementById("adj_hue").value);
+  const sa = Number(document.getElementById("adj_sat").value);
+
+  if(br===0 && co===0 && hu===0 && sa===0) return;
+
+  applyToTargets((img)=>{
+    if(br!==0 || co!==0) applyBrightnessContrast(img, br, co);
+    if(hu!==0 || sa!==0) applyHueSaturation(img, hu, sa);
+  });
+});
+
+document.getElementById("btn_reset_ajustes").addEventListener("click", ()=>{
+  document.getElementById("adj_brightness").value = 0;
+  document.getElementById("adj_contrast").value = 0;
+  document.getElementById("adj_hue").value = 0;
+  document.getElementById("adj_sat").value = 0;
+});
+
+/* Filtros blur/sharpen */
+document.getElementById("btn_aplicar_filtros").addEventListener("click", ()=>{
+  const blur = Number(document.getElementById("flt_blur").value);
+  const sharp = Number(document.getElementById("flt_sharpen").value);
+  if(blur===0 && sharp===0) return;
+
+  applyToTargets((img)=>{
+    if(blur>0) boxBlur(img, blur);
+    if(sharp>0) sharpen(img, sharp);
+  });
+});
+
+document.getElementById("btn_reset_filtros").addEventListener("click", ()=>{
+  document.getElementById("flt_blur").value = 0;
+  document.getElementById("flt_sharpen").value = 0;
+});
+
+/* =========================
+   Documento: resize, rotate, flip, fondo base
+========================= */
+function resizeDocument(newW, newH, record=true){
+  newW = clamp(Math.floor(newW), 1, 4096);
+  newH = clamp(Math.floor(newH), 1, 4096);
+
+  if(record) pushHistory("Redimensionar");
+
+  // resize lienzo y overlay
+  const oldW = lienzo.width, oldH = lienzo.height;
+  lienzo.width = newW; lienzo.height = newH;
+  overlay.width = newW; overlay.height = newH;
+
+  // reescalar canvases de capas manteniendo contenido (simple: drawImage)
+  for(const L of layers){
+    const old = L.canvas;
+    const tmp = document.createElement("canvas");
+    tmp.width = newW; tmp.height = newH;
+    const tctx = tmp.getContext("2d");
+    tctx.drawImage(old, 0,0, oldW,oldH, 0,0, newW,newH);
+    L.canvas.width = newW; L.canvas.height = newH;
+    L.ctx = L.canvas.getContext("2d", { willReadFrequently:true });
+    L.ctx.drawImage(tmp,0,0);
+  }
+
+  clearOverlay();
+  seleccion = null;
+  crop_rect = null;
+  actualizarInfoDoc();
+  renderComposite();
+  refreshLayersUI();
+}
+
+document.getElementById("btn_redimensionar").addEventListener("click", ()=>{
+  const w = Number(document.getElementById("input_w").value);
+  const h = Number(document.getElementById("input_h").value);
+  resizeDocument(w,h,true);
+});
+
+/* Rotar/flip aplicados por capa o por todo */
+function transformTargets(fn){
+  const scope = select_scope.value;
+  if(scope==="merged"){
+    // aplicar sobre active desde composición
+    pushHistory("Transformar fusionada");
+    const {temp} = getMergedImageData();
+    // volcamos a active con transform
+    const L = layers[active_layer];
+    L.ctx.clearRect(0,0,lienzo.width,lienzo.height);
+    fn(L.ctx, temp);
+    renderComposite();
+    return;
+  }
+  pushHistory("Transformar");
+  const targets = scope==="all" ? layers : [layers[active_layer]];
+  for(const L of targets){
+    const tmp = document.createElement("canvas");
+    tmp.width = lienzo.width; tmp.height = lienzo.height;
+    const tctx = tmp.getContext("2d");
+    tctx.drawImage(L.canvas,0,0);
+    L.ctx.clearRect(0,0,lienzo.width,lienzo.height);
+    fn(L.ctx, tmp);
+  }
+  renderComposite();
+}
+
+document.getElementById("btn_rotar_90").addEventListener("click", ()=>{
+  // 90° CW requiere cambiar dimensiones si no es cuadrado
+  if(lienzo.width !== lienzo.height){
+    alert("Para rotar 90° en lienzo no cuadrado, primero ajusta tamaño o implementamos rotación con intercambio W/H.");
+    return;
+  }
+  transformTargets((ctx, src)=>{
+    ctx.save();
+    ctx.translate(lienzo.width,0);
+    ctx.rotate(Math.PI/2);
+    ctx.drawImage(src,0,0);
+    ctx.restore();
+  });
+});
+
+document.getElementById("btn_flip_h").addEventListener("click", ()=>{
+  transformTargets((ctx, src)=>{
+    ctx.save();
+    ctx.translate(lienzo.width,0);
+    ctx.scale(-1,1);
+    ctx.drawImage(src,0,0);
+    ctx.restore();
+  });
+});
+
+document.getElementById("btn_flip_v").addEventListener("click", ()=>{
+  transformTargets((ctx, src)=>{
+    ctx.save();
+    ctx.translate(0,lienzo.height);
+    ctx.scale(1,-1);
+    ctx.drawImage(src,0,0);
+    ctx.restore();
+  });
+});
+
+/* Fondo base: crea una capa inferior de color */
+function addBackground(color){
+  pushHistory("Fondo base");
+  const L = createLayer("Fondo");
+  if(color){
+    L.ctx.fillStyle = color;
+    L.ctx.fillRect(0,0,lienzo.width,lienzo.height);
+  } // si null => transparente
+  // insertar al fondo
+  layers.unshift(L);
+  active_layer = layers.length-1; // mantener la capa activa arriba
+  refreshLayersUI();
+  renderComposite();
+}
+document.getElementById("btn_fondo_blanco").addEventListener("click", ()=> addBackground("#ffffff"));
+document.getElementById("btn_fondo_negro").addEventListener("click", ()=> addBackground("#000000"));
+document.getElementById("btn_fondo_transp").addEventListener("click", ()=> addBackground(null));
+
+/* =========================
+   Crop: aplicar recorte
+========================= */
+function applyCrop(){
+  if(!crop_rect || crop_rect.w<2 || crop_rect.h<2) return;
+  pushHistory("Recortar");
+
+  const x = Math.floor(crop_rect.x), y = Math.floor(crop_rect.y);
+  const w = Math.floor(crop_rect.w), h = Math.floor(crop_rect.h);
+
+  // recortar cada capa a nuevo canvas
+  for(const L of layers){
+    const tmp = document.createElement("canvas");
+    tmp.width = w; tmp.height = h;
+    const tctx = tmp.getContext("2d");
+    tctx.drawImage(L.canvas, x,y,w,h, 0,0,w,h);
+
+    L.canvas.width = w; L.canvas.height = h;
+    L.ctx = L.canvas.getContext("2d", { willReadFrequently:true });
+    L.ctx.drawImage(tmp,0,0);
+  }
+
+  lienzo.width = w; lienzo.height = h;
+  overlay.width = w; overlay.height = h;
+  crop_rect = null;
+  seleccion = null;
+  clearOverlay();
+  actualizarInfoDoc();
+  refreshLayersUI();
+  renderComposite();
+}
+
+/* Doble click en crop aplica */
+contenedor.addEventListener("dblclick", ()=>{
+  if(herramienta_actual==="crop"){
+    applyCrop();
+  }
+});
+
+/* =========================
+   Atajos teclado
+========================= */
+window.addEventListener("keydown", (e)=>{
+  const ctrl = e.ctrlKey || e.metaKey;
+  if(ctrl && e.key.toLowerCase()==="z"){
+    e.preventDefault();
+    if(e.shiftKey) btn_rehacer.click();
+    else btn_deshacer.click();
+    return;
+  }
+  if(ctrl && (e.key==="+" || e.key==="=")){ e.preventDefault(); setZoom(zoom_nivel+0.1); return; }
+  if(ctrl && (e.key==="-" || e.key==="_")){ e.preventDefault(); setZoom(zoom_nivel-0.1); return; }
+
+  // tools
+  const k = e.key.toLowerCase();
+  if(k==="b") setTool("brush","🖌 Pincel");
+  if(k==="e") setTool("eraser","🧽 Borrador");
+  if(k==="g") setTool("gradient","🌈 Degradado");
+  if(k==="i") setTool("picker","💉 Gotero");
+  if(k==="m") setTool("select","🔲 Selección");
+  if(k==="v") setTool("move","✋ Mover");
+  if(k==="t") setTool("text","🔤 Texto");
+  if(k==="c") setTool("crop","✂️ Recortar");
+  if(k==="h") setTool("hand","🖐 Pan");
+});
+
+/* =========================
+   Init
+========================= */
+function init(){
+  ensureBase();
+  actualizarInfoDoc();
+  lbl_tamano.textContent = input_tamano.value + "px";
+  lbl_opacity.textContent = input_opacity.value + "%";
+  setViewTransform();
+  updateHistoryButtons();
+  renderComposite();
+  refreshLayersUI();
+}
+init();
+</script>
+</body>
+</html>
