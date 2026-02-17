@@ -6,4 +6,5 @@ source venv/bin/activate
 
 pip install torch
 pip install datasets
-
+pip install transformers
+pip install peft
